@@ -1,6 +1,7 @@
 # Custom config
 results/
-
+*.iml
+.idea/
 
 # remove DS_Store
 **/.DS_Store
