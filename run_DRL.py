@@ -4,6 +4,14 @@ import numpy as np
 import time
 from stable_baselines.common.vec_env import DummyVecEnv
 
+# Disable TensorFlow Deprecation warnings from stable_baselines package
+try:
+    from tensorflow.python.util import module_wrapper as deprecation
+except ImportError:
+    from tensorflow.python.util import deprecation_wrapper as deprecation
+deprecation._PER_MODULE_WARNING_LIMIT = 0
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+
 # preprocessor
 from preprocessing.preprocessors import *
 # config
@@ -37,9 +45,9 @@ def run_model() -> None:
     # validation_window is the number of months to validation the model and select for trading
     rebalance_window = 63
     validation_window = 63
-    
+
     ## Ensemble Strategy
-    run_ensemble_strategy(df=data, 
+    run_ensemble_strategy(df=data,
                           unique_trade_date= unique_trade_date,
                           rebalance_window = rebalance_window,
                           validation_window=validation_window)
