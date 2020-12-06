@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import time
 import gym
+import tensorflow as tf
 
 # RL models from stable-baselines
 from stable_baselines import GAIL, SAC
@@ -32,10 +33,15 @@ def train_A2C(env_train, model_name, timesteps=25000):
     """A2C model"""
 
 
+    # Profile from batches 10 to 15
+    tb_callback = tf.keras.callbacks.TensorBoard(log_dir="./a2c_tensorboard/",
+                                             profile_batch='10, 15')
+
+
     start = time.time()
     info_log(f"Started A2C Training at {start}")
     model = A2C('MlpPolicy', env_train, verbose=0, tensorboard_log="./a2c_tensorboard/")
-    model.learn(total_timesteps=timesteps)
+    model.learn(total_timesteps=timesteps, callback=tb_callback)
     timing.log("Finished A2C training", start)
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")

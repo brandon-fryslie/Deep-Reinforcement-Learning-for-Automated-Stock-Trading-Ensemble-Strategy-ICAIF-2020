@@ -100,7 +100,7 @@ class StockEnvTrade(gym.Env):
         # perform buy action based on the sign of the action
         if self.turbulence< self.turbulence_threshold:
             available_amount = self.state[0] // self.state[index+1]
-            # print(f'available_amount:{available_amount}')
+            print(f'available_amount:{available_amount}')
 
             #update balance
             self.state[0] -= self.state[index+1]*min(available_amount, action)* \
@@ -180,7 +180,7 @@ class StockEnvTrade(gym.Env):
             self.turbulence = self.data['turbulence'].values[0]
             #print(self.turbulence)
             #load next state
-            print(f"stock_shares: {self.state[29:]}")
+            # print(f"stock_shares: {self.state[29:]}")
             self.state =  [self.state[0]] + \
                     self.data.adjcp.values.tolist() + \
                     list(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]) + \
