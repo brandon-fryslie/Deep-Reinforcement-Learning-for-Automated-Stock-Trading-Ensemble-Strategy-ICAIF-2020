@@ -206,11 +206,11 @@ def run_single_strategy(df, unique_trade_date, rebalance_window, validation_wind
 
     start = time.time()
 
-    # Normally we want to run over all the data
+    # Some day we want to run over all the data
     range_end_idx = len(unique_trade_date)
 
-    # For now, lets just do 5 cycles of the rebalance window
-    range_end_idx = rebalance_window * 5
+    # For now, lets just do 2 cycles of the rebalance+validation window
+    range_end_idx = (rebalance_window + validation_window) * 2
 
     for i in range(rebalance_window + validation_window, range_end_idx, rebalance_window):
         curr_start_idx = i - rebalance_window - validation_window
