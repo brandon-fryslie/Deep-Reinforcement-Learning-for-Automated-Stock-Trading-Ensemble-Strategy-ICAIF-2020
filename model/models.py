@@ -20,6 +20,7 @@ from stable_baselines.common.vec_env import DummyVecEnv
 from helpers.colors import info_log
 from preprocessing.preprocessors import *
 from config import config
+from helpers import timing
 
 # customized env
 from env.EnvMultipleStock_train import StockEnvTrain
@@ -30,13 +31,14 @@ from env.EnvMultipleStock_trade import StockEnvTrade
 def train_A2C(env_train, model_name, timesteps=25000):
     """A2C model"""
 
+
     start = time.time()
+    info_log(f"Started A2C Training at {start}")
     model = A2C('MlpPolicy', env_train, verbose=0, tensorboard_log="./a2c_tensorboard/")
     model.learn(total_timesteps=timesteps)
-    end = time.time()
+    timing.log("Finished A2C training", start)
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
-    print('Training time (A2C): ', (end - start) / 60, ' minutes')
     return model
 
 def train_ACER(env_train, model_name, timesteps=25000):
