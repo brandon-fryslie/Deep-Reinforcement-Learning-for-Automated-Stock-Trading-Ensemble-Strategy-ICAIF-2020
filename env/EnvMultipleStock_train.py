@@ -30,14 +30,14 @@ class StockEnvTrain(gym.Env):
         self.df = df
 
         # action_space normalization and shape is STOCK_DIM
-        self.action_space = spaces.Box(low = -1, high = 1,shape = (STOCK_DIM,)) 
-        # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30] 
+        self.action_space = spaces.Box(low = -1, high = 1,shape = (STOCK_DIM,))
+        # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30]
         # +[macd 1-30]+ [rsi 1-30] + [cci 1-30] + [adx 1-30]
         self.observation_space = spaces.Box(low=0, high=np.inf, shape = (181,))
         # load data from a pandas dataframe
         self.data = self.df.loc[self.day,:]
-        self.terminal = False             
-        # initalize state
+        self.terminal = False
+        # initialize state
         self.state = [INITIAL_ACCOUNT_BALANCE] + \
                       self.data.adjcp.values.tolist() + \
                       [0]*STOCK_DIM + \
@@ -60,18 +60,15 @@ class StockEnvTrain(gym.Env):
         # perform sell action based on the sign of the action
         if self.state[index+STOCK_DIM+1] > 0:
             #update balance
-            self.state[0] += \
-            self.state[index+1]*min(abs(action),self.state[index+STOCK_DIM+1]) * \
-             (1- TRANSACTION_FEE_PERCENT)
+            self.state[0] += self.state[index+1] * min(abs(action), self.state[index+STOCK_DIM+1]) * (1- TRANSACTION_FEE_PERCENT)
 
             self.state[index+STOCK_DIM+1] -= min(abs(action), self.state[index+STOCK_DIM+1])
-            self.cost +=self.state[index+1]*min(abs(action),self.state[index+STOCK_DIM+1]) * \
-             TRANSACTION_FEE_PERCENT
+            self.cost +=self.state[index+1]*min(abs(action),self.state[index+STOCK_DIM+1]) * TRANSACTION_FEE_PERCENT
             self.trades+=1
         else:
             pass
 
-    
+
     def _buy_stock(self, index, action):
         # perform buy action based on the sign of the action
         available_amount = self.state[0] // self.state[index+1]
@@ -86,7 +83,7 @@ class StockEnvTrain(gym.Env):
         self.cost+=self.state[index+1]*min(available_amount, action)* \
                           TRANSACTION_FEE_PERCENT
         self.trades+=1
-        
+
     def step(self, actions):
         # print(self.day)
         self.terminal = self.day >= len(self.df.index.unique())-1
@@ -98,7 +95,7 @@ class StockEnvTrain(gym.Env):
             plt.close()
             end_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
-            
+
             #print("end_total_asset:{}".format(end_total_asset))
             df_total_value = pd.DataFrame(self.asset_memory)
             df_total_value.to_csv('results/account_value_train.csv')
@@ -113,11 +110,11 @@ class StockEnvTrain(gym.Env):
             #print("=================================")
             df_rewards = pd.DataFrame(self.rewards_memory)
             #df_rewards.to_csv('results/account_rewards_train.csv')
-            
+
             # print('total asset: {}'.format(self.state[0]+ sum(np.array(self.state[1:29])*np.array(self.state[29:]))))
-            #with open('obs.pkl', 'wb') as f:  
+            #with open('obs.pkl', 'wb') as f:
             #    pickle.dump(self.state, f)
-            
+
             return self.state, self.reward, self.terminal,{}
 
         else:
@@ -125,13 +122,13 @@ class StockEnvTrain(gym.Env):
 
             actions = actions * HMAX_NORMALIZE
             #actions = (actions.astype(int))
-            
+
             begin_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
             #print("begin_total_asset:{}".format(begin_total_asset))
-            
+
             argsort_actions = np.argsort(actions)
-            
+
             sell_index = argsort_actions[:np.where(actions < 0)[0].shape[0]]
             buy_index = argsort_actions[::-1][:np.where(actions > 0)[0].shape[0]]
 
@@ -144,7 +141,7 @@ class StockEnvTrain(gym.Env):
                 self._buy_stock(index, actions[index])
 
             self.day += 1
-            self.data = self.df.loc[self.day,:]         
+            self.data = self.df.loc[self.day,:]
             #load next state
             # print("stock_shares:{}".format(self.state[29:]))
             self.state =  [self.state[0]] + \
@@ -154,17 +151,17 @@ class StockEnvTrain(gym.Env):
                     self.data.rsi.values.tolist() + \
                     self.data.cci.values.tolist() + \
                     self.data.adx.values.tolist()
-            
+
             end_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
             self.asset_memory.append(end_total_asset)
             #print("end_total_asset:{}".format(end_total_asset))
-            
-            self.reward = end_total_asset - begin_total_asset            
+
+            self.reward = end_total_asset - begin_total_asset
             # print("step_reward:{}".format(self.reward))
             self.rewards_memory.append(self.reward)
-            
-            self.reward = self.reward*REWARD_SCALING
+
+            self.reward = self.reward * REWARD_SCALING
 
 
 
@@ -176,7 +173,7 @@ class StockEnvTrain(gym.Env):
         self.data = self.df.loc[self.day,:]
         self.cost = 0
         self.trades = 0
-        self.terminal = False 
+        self.terminal = False
         self.rewards_memory = []
         #initiate state
         self.state = [INITIAL_ACCOUNT_BALANCE] + \
@@ -185,10 +182,10 @@ class StockEnvTrain(gym.Env):
                       self.data.macd.values.tolist() + \
                       self.data.rsi.values.tolist() + \
                       self.data.cci.values.tolist() + \
-                      self.data.adx.values.tolist() 
-        # iteration += 1 
+                      self.data.adx.values.tolist()
+        # iteration += 1
         return self.state
-    
+
     def render(self, mode='human'):
         return self.state
 

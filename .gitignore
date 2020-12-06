@@ -2,6 +2,7 @@
 results/
 *.iml
 .idea/
+trained_models/
 
 # remove DS_Store
 **/.DS_Store

@@ -4,6 +4,8 @@ import numpy as np
 import time
 from stable_baselines.common.vec_env import DummyVecEnv
 
+from helpers.colors import info_log
+
 # Disable TensorFlow Deprecation warnings from stable_baselines package
 try:
     from tensorflow.python.util import module_wrapper as deprecation
@@ -32,10 +34,8 @@ def run_model() -> None:
         data = add_turbulence(data)
         data.to_csv(preprocessed_path)
 
-    print("run_model data.head()")
-    print(data.head())
-    print("run_model data.size")
-    print(data.size)
+    info_log(f"Loaded {data.size} dataframes.  First frame:")
+    info_log(data.head())
 
     # 2015/10/01 is the date that validation starts
     # 2016/01/01 is the date that real trading starts
@@ -49,7 +49,7 @@ def run_model() -> None:
     validation_window = 63
 
     ## Ensemble Strategy
-    run_ensemble_strategy(df=data,
+    run_single_strategy(df=data,
                           unique_trade_date= unique_trade_date,
                           rebalance_window = rebalance_window,
                           validation_window=validation_window)
