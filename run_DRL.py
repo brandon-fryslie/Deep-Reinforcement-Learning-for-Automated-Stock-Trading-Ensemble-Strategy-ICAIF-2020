@@ -32,7 +32,9 @@ def run_model() -> None:
         data = add_turbulence(data)
         data.to_csv(preprocessed_path)
 
+    print("run_model data.head()")
     print(data.head())
+    print("run_model data.size")
     print(data.size)
 
     # 2015/10/01 is the date that validation starts
@@ -55,4 +57,5 @@ def run_model() -> None:
     #_logger.info(f"saving model version: {_version}")
 
 if __name__ == "__main__":
+    print("!!!! Starting Model Training !!!!")
     run_model()
