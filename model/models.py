@@ -31,7 +31,7 @@ def train_A2C(env_train, model_name, timesteps=25000):
     """A2C model"""
 
     start = time.time()
-    model = A2C('MlpPolicy', env_train, verbose=0)
+    model = A2C('MlpPolicy', env_train, verbose=0, tensorboard_log="./a2c_tensorboard/")
     model.learn(total_timesteps=timesteps)
     end = time.time()
 
@@ -41,7 +41,7 @@ def train_A2C(env_train, model_name, timesteps=25000):
 
 def train_ACER(env_train, model_name, timesteps=25000):
     start = time.time()
-    model = ACER('MlpPolicy', env_train, verbose=0)
+    model = ACER('MlpPolicy', env_train, verbose=0, tensorboard_log="./acer_tensorboard/")
     model.learn(total_timesteps=timesteps)
     end = time.time()
 
@@ -59,7 +59,7 @@ def train_DDPG(env_train, model_name, timesteps=10000):
     action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=float(0.5) * np.ones(n_actions))
 
     start = time.time()
-    model = DDPG('MlpPolicy', env_train, param_noise=param_noise, action_noise=action_noise)
+    model = DDPG('MlpPolicy', env_train, param_noise=param_noise, action_noise=action_noise, tensorboard_log="./ddpg_tensorboard/")
     model.learn(total_timesteps=timesteps)
     end = time.time()
 
@@ -67,27 +67,11 @@ def train_DDPG(env_train, model_name, timesteps=10000):
     print('Training time (DDPG): ', (end-start)/60,' minutes')
     return model
 
-def train_model(strategy_name, env_train, model_name, timesteps=50000):
-    if strategy_name == "PPO":
-        res = train_PPO(env_train, model_name=model_name, timesteps=timesteps)
-    elif strategy_name == "GAIL":
-        res = train_GAIL(env_train, model_name=model_name, timesteps=timesteps)
-    elif strategy_name == "GAIL":
-        res = train_DDPG(env_train, model_name=model_name, timesteps=timesteps)
-    elif strategy_name == "ACER":
-        res = train_ACER(env_train, model_name=model_name, timesteps=timesteps)
-    elif strategy_name == "A2C":
-        res = train_A2C(env_train, model_name=model_name, timesteps=timesteps)
-    else:
-        raise EnvironmentError(f"Strategy name {strategy_name} is invalid")
-
-    return res
-
 def train_PPO(env_train, model_name, timesteps=50000):
     """PPO model"""
 
     start = time.time()
-    model = PPO2('MlpPolicy', env_train, ent_coef = 0.005, nminibatches = 8)
+    model = PPO2('MlpPolicy', env_train, ent_coef = 0.005, nminibatches = 8, tensorboard_log="./ppo_tensorboard/")
     #model = PPO2('MlpPolicy', env_train, ent_coef = 0.005)
 
     model.learn(total_timesteps=timesteps)
@@ -115,6 +99,23 @@ def train_GAIL(env_train, model_name, timesteps=1000):
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
     print('Training time (GAIL): ', (end - start) / 60, ' minutes')
     return model
+
+
+def train_model(strategy_name, env_train, model_name, timesteps=50000):
+    if strategy_name == "PPO":
+        res = train_PPO(env_train, model_name=model_name, timesteps=timesteps)
+    elif strategy_name == "GAIL":
+        res = train_GAIL(env_train, model_name=model_name, timesteps=timesteps)
+    elif strategy_name == "DDPG":
+        res = train_DDPG(env_train, model_name=model_name, timesteps=timesteps)
+    elif strategy_name == "ACER":
+        res = train_ACER(env_train, model_name=model_name, timesteps=timesteps)
+    elif strategy_name == "A2C":
+        res = train_A2C(env_train, model_name=model_name, timesteps=timesteps)
+    else:
+        raise EnvironmentError(f"Strategy name {strategy_name} is invalid")
+
+    return res
 
 
 def DRL_prediction(df,

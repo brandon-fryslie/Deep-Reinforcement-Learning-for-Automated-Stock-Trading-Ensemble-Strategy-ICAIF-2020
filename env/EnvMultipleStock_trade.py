@@ -4,6 +4,9 @@ from gym.utils import seeding
 import gym
 from gym import spaces
 import matplotlib
+
+from helpers.colors import info_log
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pickle
@@ -97,7 +100,7 @@ class StockEnvTrade(gym.Env):
         # perform buy action based on the sign of the action
         if self.turbulence< self.turbulence_threshold:
             available_amount = self.state[0] // self.state[index+1]
-            # print('available_amount:{}'.format(available_amount))
+            # print(f'available_amount:{available_amount}')
 
             #update balance
             self.state[0] -= self.state[index+1]*min(available_amount, action)* \
@@ -165,11 +168,11 @@ class StockEnvTrade(gym.Env):
             buy_index = argsort_actions[::-1][:np.where(actions > 0)[0].shape[0]]
 
             for index in sell_index:
-                print('take sell action'.format(actions[index]))
+                # info_log(f"take sell action {actions[index]}")
                 self._sell_stock(index, actions[index])
 
             for index in buy_index:
-                print('take buy action: {}'.format(actions[index]))
+                # info_log(f"take buy action {actions[index]}")
                 self._buy_stock(index, actions[index])
 
             self.day += 1
@@ -177,7 +180,7 @@ class StockEnvTrade(gym.Env):
             self.turbulence = self.data['turbulence'].values[0]
             #print(self.turbulence)
             #load next state
-            # print("stock_shares:{}".format(self.state[29:]))
+            print(f"stock_shares: {self.state[29:]}")
             self.state =  [self.state[0]] + \
                     self.data.adjcp.values.tolist() + \
                     list(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]) + \
